@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6x6 Bingo Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #bingo-board {
+            display: grid;
+            grid-template-columns: repeat(6, 60px);
+            gap: 8px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            background: white;
+            cursor: pointer;
+            border-radius: 10px;
+            user-select: none;
+        }
+
+        .marked {
+            background: lightgreen;
+            font-weight: bold;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>6x6 Bingo Game</h1>
+    <div id="bingo-board"></div>
+    <div id="status">Lines completed: 0 / 6</div>
+
+    <script>
+        const board = document.getElementById('bingo-board');
+        const status = document.getElementById('status');
+
+        const size = 6;
+        const numbers = shuffle(Array.from({ length: 36 }, (_, i) => i + 1));
+        const cells = [];
+        let completedLines = new Set();
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function createBoard() {
+            board.innerHTML = '';
+            cells.length = 0;
+            completedLines.clear();
+
+            for (let i = 0; i < size * size; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = numbers[i];
+                cell.addEventListener('click', () => markCell(cell));
+                board.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        function markCell(cell) {
+            if (cell.classList.contains('marked')) return;
+            cell.classList.add('marked');
+            checkAllLines();
+        }
+
+        function checkAllLines() {
+            completedLines.clear();
+
+            for (let i = 0; i < size; i++) {
+                if (isLineMarked(i * size, 1)) completedLines.add('row' + i);
+                if (isLineMarked(i, size)) completedLines.add('col' + i);
+            }
+
+            if (isLineMarked(0, size + 1)) completedLines.add('diag1');
+            if (isLineMarked(size - 1, size - 1)) completedLines.add('diag2');
+
+            status.textContent = `Lines completed: ${completedLines.size} / 6`;
+
+            if (completedLines.size >= 6) {
+                status.textContent = "BINGO! You completed 6 lines!";
+            }
+        }
+
+        function isLineMarked(start, step) {
+            for (let i = 0; i < size; i++) {
+                if (!cells[start + i * step].classList.contains('marked')) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        createBoard();
+    </script>
+
+</body>
+</html>
